@@ -229,9 +229,9 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** un valor inválido (≤ 0 o no numérico), **cuando** intento guardar, **entonces** se rechaza.
 
 **Tareas técnicas**
-- [ ] T-05.1.1 — Tabla `settings` (clave/valor) o tabla `fuel_price` con vigencia.
-- [ ] T-05.1.2 — `GET`/`PUT /api/settings/fuel-price`.
-- [ ] T-05.1.3 — UI de configuración.
+- [x] T-05.1.1 — Tabla `settings` (clave/valor) o tabla `fuel_price` con vigencia.
+- [x] T-05.1.2 — `GET`/`PUT /api/settings/fuel-price`.
+- [x] T-05.1.3 — UI de configuración.
 
 ---
 

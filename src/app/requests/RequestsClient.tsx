@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+
+const RequestMapModal = dynamic(() => import('./RequestMapModal'), { ssr: false })
 
 interface TransportRequest {
   id: number
@@ -529,15 +532,15 @@ function ConfirmStatusModal({ requestId, requesterName, action, onClose, onUpdat
 interface RequestCardProps {
   req: TransportRequest
   onRefresh: () => void
+  onViewMap: () => void
 }
 
-function RequestCard({ req, onRefresh }: RequestCardProps) {
+function RequestCard({ req, onRefresh, onViewMap }: RequestCardProps) {
   const [modal, setModal] = useState<'edit' | 'cancel' | 'complete' | null>(null)
 
   const canEdit     = req.status === 'pending'
   const canCancel   = req.status === 'pending' || req.status === 'assigned'
   const canComplete = req.status === 'assigned'
-  const hasActions  = canEdit || canComplete || canCancel
 
   return (
     <>
@@ -551,51 +554,60 @@ function RequestCard({ req, onRefresh }: RequestCardProps) {
           <StatusBadge status={req.status} />
         </div>
 
-        {/* Route */}
-        <div className="flex items-center gap-2 text-sm text-gray-700">
-          <span className="truncate" title={req.origin_label}>{req.origin_label}</span>
+        {/* Route — clickable shortcut to map */}
+        <button
+          onClick={onViewMap}
+          className="flex items-center gap-2 text-sm text-gray-700 hover:text-blue-600 text-left transition-colors"
+          title="Ver ruta en el mapa"
+        >
+          <span className="truncate">{req.origin_label}</span>
           <span className="text-gray-300 shrink-0">→</span>
-          <span className="truncate" title={req.dest_label}>{req.dest_label}</span>
-        </div>
+          <span className="truncate">{req.dest_label}</span>
+        </button>
 
         {/* Meta */}
         <div className="flex items-center gap-4 text-xs text-gray-500">
           <span>🐄 <strong className="text-gray-700">{req.head_count}</strong> cabezas</span>
-          {req.distance_km != null && (
-            <span>📍 <strong className="text-gray-700">{Number(req.distance_km).toFixed(1)} km</strong></span>
-          )}
+          {req.distance_km != null
+            ? <span>📍 <strong className="text-gray-700">{Number(req.distance_km).toFixed(1)} km</strong></span>
+            : <span className="text-gray-300">Sin distancia</span>
+          }
           <span className="ml-auto">{new Date(req.created_at).toLocaleDateString('es-PY')}</span>
         </div>
 
         {/* Actions */}
-        {hasActions && (
-          <div className="flex gap-2 pt-1 border-t border-gray-100">
-            {canEdit && (
-              <button
-                onClick={() => setModal('edit')}
-                className="flex-1 px-3 py-1.5 text-xs bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
-              >
-                Editar
-              </button>
-            )}
-            {canComplete && (
-              <button
-                onClick={() => setModal('complete')}
-                className="flex-1 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors font-medium"
-              >
-                Completar
-              </button>
-            )}
-            {canCancel && (
-              <button
-                onClick={() => setModal('cancel')}
-                className="flex-1 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-            )}
-          </div>
-        )}
+        <div className="flex gap-2 pt-1 border-t border-gray-100">
+          <button
+            onClick={onViewMap}
+            className="px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium"
+          >
+            Ver ruta
+          </button>
+          {canEdit && (
+            <button
+              onClick={() => setModal('edit')}
+              className="flex-1 px-3 py-1.5 text-xs bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+            >
+              Editar
+            </button>
+          )}
+          {canComplete && (
+            <button
+              onClick={() => setModal('complete')}
+              className="flex-1 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors font-medium"
+            >
+              Completar
+            </button>
+          )}
+          {canCancel && (
+            <button
+              onClick={() => setModal('cancel')}
+              className="flex-1 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+          )}
+        </div>
       </div>
 
       {modal === 'edit' && (
@@ -638,11 +650,12 @@ const TABS: { key: StatusFilter; label: string }[] = [
 ]
 
 export default function RequestsClient() {
-  const [requests, setRequests] = useState<TransportRequest[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState('')
-  const [filter, setFilter]     = useState<StatusFilter>('all')
-  const [showCreate, setShowCreate] = useState(false)
+  const [requests, setRequests]   = useState<TransportRequest[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState('')
+  const [filter, setFilter]       = useState<StatusFilter>('all')
+  const [showCreate, setShowCreate]   = useState(false)
+  const [mapRequest, setMapRequest] = useState<TransportRequest | null>(null)
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -736,7 +749,12 @@ export default function RequestsClient() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {requests.map(req => (
-            <RequestCard key={req.id} req={req} onRefresh={fetchRequests} />
+            <RequestCard
+              key={req.id}
+              req={req}
+              onRefresh={fetchRequests}
+              onViewMap={() => setMapRequest(req)}
+            />
           ))}
         </div>
       )}
@@ -745,6 +763,20 @@ export default function RequestsClient() {
         <CreateModal
           onClose={() => setShowCreate(false)}
           onCreated={fetchRequests}
+        />
+      )}
+
+      {mapRequest && (
+        <RequestMapModal
+          req={mapRequest}
+          onClose={() => setMapRequest(null)}
+          onDistanceSaved={(km) => {
+            // Update distance_km in local state so card reflects new value immediately
+            setRequests(prev =>
+              prev.map(r => r.id === mapRequest.id ? { ...r, distance_km: String(km) } : r)
+            )
+            setMapRequest(prev => prev ? { ...prev, distance_km: String(km) } : null)
+          }}
         />
       )}
     </div>
