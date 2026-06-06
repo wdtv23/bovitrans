@@ -1,0 +1,45 @@
+# === Dependencias ===
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# === Build / salida de Next.js ===
+/.next/
+/out/
+/build
+/dist
+next-env.d.ts
+
+# === Variables de entorno (NUNCA versionar secretos) ===
+.env
+.env.local
+.env.*.local
+# Se versiona solo la plantilla:
+!.env.example
+
+# === Logs ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# === Datos de PostgreSQL (si se montara local fuera de Docker) ===
+/pgdata/
+*.sqlite
+
+# === Testing / cobertura ===
+/coverage
+
+# === Editores / SO ===
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Misc ===
+*.pem
+.vercel
+.turbo
