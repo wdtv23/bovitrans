@@ -60,10 +60,10 @@ Costo Combustible = Distancia (Km) × Consumo del Vehículo (L/Km) × Precio Com
 - **Dado** que estoy autenticado, **cuando** registro un camión, **entonces** el registro queda atribuido a mi usuario (`created_by`) y la fecha de carga.
 
 **Tareas técnicas**
-- [ ] T-01.1.1 — Tabla `trucks` con constraint `UNIQUE(plate)`, `CHECK(capacity > 0)`, `CHECK(consumption_l_per_km > 0)` y FK `created_by → users(id)`.
-- [ ] T-01.1.2 — `POST /api/trucks` con validación de payload (zod) y manejo de 201/400/409.
-- [ ] T-01.1.3 — Formulario de alta con validación client-side y feedback inline.
-- [ ] T-01.1.4 — Tests de API: alta válida, patente duplicada, valores inválidos.
+- [x] T-01.1.1 — Tabla `trucks` con constraint `UNIQUE(plate)`, `CHECK(capacity > 0)`, `CHECK(consumption_l_per_km > 0)` y FK `created_by → users(id)`.
+- [x] T-01.1.2 — `POST /api/trucks` con validación de payload (zod) y manejo de 201/400/409.
+- [x] T-01.1.3 — Formulario de alta con validación client-side y feedback inline.
+- [x] T-01.1.4 — Tests de API: alta válida, patente duplicada, valores inválidos.
 
 ### US-01.2 — Listar y consultar camiones
 **Como** operador, **quiero** ver el listado de camiones con su estado, **para** conocer la flota disponible.
@@ -73,8 +73,8 @@ Costo Combustible = Distancia (Km) × Consumo del Vehículo (L/Km) × Precio Com
 - **Dado** que no hay camiones, **cuando** abro el módulo, **entonces** veo un *empty state* con CTA para registrar el primero.
 
 **Tareas técnicas**
-- [ ] T-01.2.1 — `GET /api/trucks` (con filtro `?status=active`).
-- [ ] T-01.2.2 — Tabla/listado responsivo con estados visuales.
+- [x] T-01.2.1 — `GET /api/trucks` (con filtro `?status=active`).
+- [x] T-01.2.2 — Tabla/listado responsivo con estados visuales.
 
 ### US-01.3 — Desactivar un camión
 **Como** operador, **quiero** desactivar un camión fuera de servicio, **para** que no aparezca como asignable sin perder su historial.
@@ -84,9 +84,9 @@ Costo Combustible = Distancia (Km) × Consumo del Vehículo (L/Km) × Precio Com
 - **Dado** un camión con asignaciones históricas, **cuando** lo desactivo, **entonces** sus asignaciones previas permanecen intactas.
 
 **Tareas técnicas**
-- [ ] T-01.3.1 — Columna `status` (`active`/`inactive`) en `trucks`.
-- [ ] T-01.3.2 — `PATCH /api/trucks/:id/status`.
-- [ ] T-01.3.3 — Excluir inactivos del selector de asignación (EP-04).
+- [x] T-01.3.1 — Columna `status` (`active`/`inactive`) en `trucks`.
+- [x] T-01.3.2 — `PATCH /api/trucks/:id/status`.
+- [x] T-01.3.3 — Excluir inactivos del selector de asignación (EP-04).
 
 ---
 
@@ -102,10 +102,10 @@ Costo Combustible = Distancia (Km) × Consumo del Vehículo (L/Km) × Precio Com
 - **Dado** que estoy autenticado, **cuando** registro una solicitud, **entonces** queda atribuida a mi usuario (`created_by`) y la fecha de carga.
 
 **Tareas técnicas**
-- [ ] T-02.1.1 — Tabla `transport_requests` (solicitante, `head_count`, origen lat/lng + label, destino lat/lng + label, `status`, `created_at`, FK `created_by → users(id)`).
-- [ ] T-02.1.2 — `POST /api/requests` con validación.
-- [ ] T-02.1.3 — Selector de puntos en mapa (geocoding/búsqueda + click).
-- [ ] T-02.1.4 — Tests de API.
+- [x] T-02.1.1 — Tabla `transport_requests` (solicitante, `head_count`, origen lat/lng + label, destino lat/lng + label, `status`, `created_at`, FK `created_by → users(id)`).
+- [x] T-02.1.2 — `POST /api/requests` con validación.
+- [x] T-02.1.3 — Selector de puntos en mapa (geocoding/búsqueda + click).
+- [x] T-02.1.4 — Tests de API.
 
 ### US-02.2 — Visualizar solicitudes en el panel
 **Como** operador, **quiero** ver todas las solicitudes entrantes como tarjetas/registros, **para** priorizar y operar.
@@ -115,11 +115,11 @@ Costo Combustible = Distancia (Km) × Consumo del Vehículo (L/Km) × Precio Com
 - **Dado** que selecciono una solicitud, **cuando** hago clic, **entonces** se traza su ruta en el mapa.
 
 **Tareas técnicas**
-- [ ] T-02.2.1 — `GET /api/requests` con filtros por estado.
-- [ ] T-02.2.2 — Componente *card* de solicitud + estado de selección.
+- [x] T-02.2.1 — `GET /api/requests` con filtros por estado.
+- [x] T-02.2.2 — Componente *card* de solicitud + estado de selección.
 
 ### US-02.3 — Gestionar el ciclo de vida de una solicitud
-**Como** operador, **quiero** avanzar o cancelar una solicitud según su estado, **para** reflejar el progreso real del viaje y evitar estados inconsistentes.
+**Como** operador, **quiero** avanzar o cancelar una solicitud según su estado y editar las solicitudes esten en pending, **para** reflejar el progreso real del viaje y evitar estados inconsistentes.
 
 **Máquina de estados:**
 ```
@@ -135,11 +135,11 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** una solicitud `completed` o `cancelled`, **cuando** intento cambiar su estado, **entonces** el sistema rechaza la transición inválida (`422`).
 
 **Tareas técnicas**
-- [ ] T-02.3.1 — Enum/CHECK de estado: `pending`, `assigned`, `completed`, `cancelled`.
-- [ ] T-02.3.2 — Validación de transiciones válidas en el servicio (rechazar saltos ilegales).
-- [ ] T-02.3.3 — `PATCH /api/requests/:id/status`.
-- [ ] T-02.3.4 — UI con acciones contextuales según estado actual.
-- [ ] T-02.3.5 — Tests de transiciones válidas e inválidas.
+- [x] T-02.3.1 — Enum/CHECK de estado: `pending`, `assigned`, `completed`, `cancelled`.
+- [x] T-02.3.2 — Validación de transiciones válidas en el servicio (rechazar saltos ilegales).
+- [x] T-02.3.3 — `PATCH /api/requests/:id/status`.
+- [x] T-02.3.4 — UI con acciones contextuales según estado actual.
+- [x] T-02.3.5 — Tests de transiciones válidas e inválidas.
 
 ---
 

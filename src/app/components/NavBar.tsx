@@ -14,6 +14,9 @@ export default async function NavBar() {
         <Link href="/trucks" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
           Flota
         </Link>
+        <Link href="/requests" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          Solicitudes
+        </Link>
         {session?.role === 'admin' && (
           <Link href="/users" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Usuarios
