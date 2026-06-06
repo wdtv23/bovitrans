@@ -1,0 +1,59 @@
+# =============================================================================
+# BoviTrans — Orquestación de contenedores
+# Levanta toda la plataforma con:  docker compose up --build
+#
+# Servicios:
+#   - db  : PostgreSQL 16 (inicializado automáticamente con db/init.sql)
+#   - app : aplicación Next.js (frontend + API REST)
+# =============================================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bovitrans-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bovitrans}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bovitrans}
+      POSTGRES_DB: ${POSTGRES_DB:-bovitrans}
+    ports:
+      # Expuesto solo para inspección local; la app usa la red interna.
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # init.sql se ejecuta SOLO en la primera inicialización del volumen.
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bovitrans} -d ${POSTGRES_DB:-bovitrans}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - bovitrans-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bovitrans-app
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-bovitrans}:${POSTGRES_PASSWORD:-bovitrans}@db:5432/${POSTGRES_DB:-bovitrans}
+      AUTH_SECRET: ${AUTH_SECRET:-change-me-in-production}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      db:
+        # La app no arranca hasta que la base responda al healthcheck.
+        condition: service_healthy
+    networks:
+      - bovitrans-net
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  bovitrans-net:
+    driver: bridge
