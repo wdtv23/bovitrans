@@ -36,9 +36,11 @@ export async function GET(request: Request) {
   try {
     const result = await pool.query(
       `SELECT t.id, t.plate, t.capacity, t.consumption_l_per_km,
-              t.status, t.created_at, u.username AS created_by_username
+              t.status, t.created_at, u.username AS created_by_username,
+              (a.id IS NULL) AS is_available
        FROM trucks t
        JOIN users u ON t.created_by = u.id
+       LEFT JOIN assignments a ON a.truck_id = t.id AND a.is_active = TRUE
        ${where}
        ORDER BY t.created_at DESC`,
       values,

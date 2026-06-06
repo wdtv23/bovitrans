@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 
 const RequestMapModal = dynamic(() => import('./RequestMapModal'), { ssr: false })
+import AssignModal from './AssignModal'
 
 interface TransportRequest {
   id: number
@@ -533,12 +534,14 @@ interface RequestCardProps {
   req: TransportRequest
   onRefresh: () => void
   onViewMap: () => void
+  onAssign: () => void
 }
 
-function RequestCard({ req, onRefresh, onViewMap }: RequestCardProps) {
+function RequestCard({ req, onRefresh, onViewMap, onAssign }: RequestCardProps) {
   const [modal, setModal] = useState<'edit' | 'cancel' | 'complete' | null>(null)
 
   const canEdit     = req.status === 'pending'
+  const canAssign   = req.status === 'pending'
   const canCancel   = req.status === 'pending' || req.status === 'assigned'
   const canComplete = req.status === 'assigned'
 
@@ -576,17 +579,30 @@ function RequestCard({ req, onRefresh, onViewMap }: RequestCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-1 border-t border-gray-100">
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-gray-100">
           <button
             onClick={onViewMap}
             className="px-3 py-1.5 text-xs bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-colors font-medium"
           >
             Ver ruta
           </button>
+          {canAssign && (
+            <button
+              onClick={onAssign}
+              title={!req.distance_km ? 'Calculá la distancia primero en "Ver ruta"' : undefined}
+              className={`px-3 py-1.5 text-xs rounded-lg transition-colors font-medium ${
+                req.distance_km
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-blue-100 text-blue-400 cursor-help'
+              }`}
+            >
+              Asignar
+            </button>
+          )}
           {canEdit && (
             <button
               onClick={() => setModal('edit')}
-              className="flex-1 px-3 py-1.5 text-xs bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
+              className="px-3 py-1.5 text-xs bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium"
             >
               Editar
             </button>
@@ -655,7 +671,8 @@ export default function RequestsClient() {
   const [error, setError]         = useState('')
   const [filter, setFilter]       = useState<StatusFilter>('all')
   const [showCreate, setShowCreate]   = useState(false)
-  const [mapRequest, setMapRequest] = useState<TransportRequest | null>(null)
+  const [mapRequest,    setMapRequest]    = useState<TransportRequest | null>(null)
+  const [assignRequest, setAssignRequest] = useState<TransportRequest | null>(null)
 
   const fetchRequests = useCallback(async () => {
     setLoading(true)
@@ -754,6 +771,7 @@ export default function RequestsClient() {
               req={req}
               onRefresh={fetchRequests}
               onViewMap={() => setMapRequest(req)}
+              onAssign={() => setAssignRequest(req)}
             />
           ))}
         </div>
@@ -763,6 +781,14 @@ export default function RequestsClient() {
         <CreateModal
           onClose={() => setShowCreate(false)}
           onCreated={fetchRequests}
+        />
+      )}
+
+      {assignRequest && (
+        <AssignModal
+          req={assignRequest}
+          onClose={() => setAssignRequest(null)}
+          onAssigned={() => { setAssignRequest(null); fetchRequests() }}
         />
       )}
 

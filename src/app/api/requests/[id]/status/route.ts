@@ -16,8 +16,6 @@ const StatusSchema = z.object({
   status: z.enum(['pending', 'assigned', 'completed', 'cancelled']),
 })
 
-type RequestRow = { status: string }
-
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -35,9 +33,8 @@ export async function PATCH(
   }
 
   let body: unknown
-  try {
-    body = await request.json()
-  } catch {
+  try { body = await request.json() }
+  catch {
     return NextResponse.json(
       { error: { code: 'BAD_REQUEST', message: 'Cuerpo inválido' } },
       { status: 400 },
@@ -54,34 +51,37 @@ export async function PATCH(
 
   const newStatus = parsed.data.status
 
-  // Leer estado actual
-  const currentResult = await pool.query<RequestRow>(
-    'SELECT status FROM transport_requests WHERE id = $1',
-    [id],
-  )
-  const current = currentResult.rows[0]
-  if (!current) {
-    return NextResponse.json(
-      { error: { code: 'NOT_FOUND', message: 'Solicitud no encontrada' } },
-      { status: 404 },
-    )
-  }
-
-  // Validar transición
-  if (!VALID_TRANSITIONS[current.status]?.includes(newStatus)) {
-    return NextResponse.json(
-      {
-        error: {
-          code: 'INVALID_TRANSITION',
-          message: `No se puede pasar de "${current.status}" a "${newStatus}"`,
-        },
-      },
-      { status: 422 },
-    )
-  }
-
+  const client = await pool.connect()
   try {
-    const result = await pool.query(
+    await client.query('BEGIN')
+
+    const currentResult = await client.query<{ status: string }>(
+      'SELECT status FROM transport_requests WHERE id = $1 FOR UPDATE',
+      [id],
+    )
+    const current = currentResult.rows[0]
+    if (!current) {
+      await client.query('ROLLBACK')
+      return NextResponse.json(
+        { error: { code: 'NOT_FOUND', message: 'Solicitud no encontrada' } },
+        { status: 404 },
+      )
+    }
+
+    if (!VALID_TRANSITIONS[current.status]?.includes(newStatus)) {
+      await client.query('ROLLBACK')
+      return NextResponse.json(
+        {
+          error: {
+            code: 'INVALID_TRANSITION',
+            message: `No se puede pasar de "${current.status}" a "${newStatus}"`,
+          },
+        },
+        { status: 422 },
+      )
+    }
+
+    const result = await client.query(
       `UPDATE transport_requests
        SET status = $1, updated_at = now()
        WHERE id = $2
@@ -90,13 +90,26 @@ export async function PATCH(
                  status, created_at`,
       [newStatus, id],
     )
+
+    // Al completar o cancelar, liberar el camión marcando la asignación como inactiva
+    if (newStatus === 'completed' || newStatus === 'cancelled') {
+      await client.query(
+        'UPDATE assignments SET is_active = FALSE WHERE request_id = $1 AND is_active = TRUE',
+        [id],
+      )
+    }
+
+    await client.query('COMMIT')
     console.info(`[requests/:id/status:PATCH] id=${id} ${current.status}→${newStatus}`)
     return NextResponse.json({ request: result.rows[0] })
   } catch (err) {
+    try { await client.query('ROLLBACK') } catch { /* ignore */ }
     console.error('[requests/:id/status:PATCH]', err)
     return NextResponse.json(
       { error: { code: 'INTERNAL_ERROR', message: 'Error interno del servidor' } },
       { status: 500 },
     )
+  } finally {
+    client.release()
   }
 }

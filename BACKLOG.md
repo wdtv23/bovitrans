@@ -153,10 +153,10 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** que el servicio de ruteo no responde, **cuando** falla, **entonces** se informa el error y se permite ingresar la distancia manualmente.
 
 **Tareas técnicas**
-- [ ] T-03.1.1 — Integrar Leaflet + capa OpenStreetMap.
-- [ ] T-03.1.2 — Integrar servicio de ruteo (OSRM público o Leaflet Routing Machine).
-- [ ] T-03.1.3 — Persistir `distance_km` en la solicitud al calcularse.
-- [ ] T-03.1.4 — *Fallback* de distancia manual.
+- [x] T-03.1.1 — Integrar Leaflet + capa OpenStreetMap.
+- [x] T-03.1.2 — Integrar servicio de ruteo (OSRM público o Leaflet Routing Machine).
+- [x] T-03.1.3 — Persistir `distance_km` en la solicitud al calcularse.
+- [x] T-03.1.4 — *Fallback* de distancia manual.
 
 ### US-03.2 — Proyección dinámica de costo según camión candidato
 **Como** operador, **quiero** que al pre-seleccionar un camión se proyecte el costo de combustible en tiempo real, **para** comparar opciones antes de confirmar.
@@ -166,8 +166,8 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** que cambio el camión candidato, **cuando** lo cambio, **entonces** el costo se recalcula al instante.
 
 **Tareas técnicas**
-- [ ] T-03.2.1 — Hook/cliente de cálculo en frontend (función pura reutilizable con backend).
-- [ ] T-03.2.2 — UI de proyección (costo + km + consumo) en el panel de detalle.
+- [x] T-03.2.1 — Hook/cliente de cálculo en frontend (función pura reutilizable con backend).
+- [x] T-03.2.2 — UI de proyección (costo + km + consumo) en el panel de detalle.
 
 ---
 
@@ -182,11 +182,11 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** un cálculo realizado, **cuando** se persiste, **entonces** se guardan los valores usados (distancia, consumo, precio vigente) para trazabilidad histórica.
 
 **Tareas técnicas**
-- [ ] T-04.1.1 — Tabla `assignments` (`request_id`, `truck_id`, `distance_km`, `consumption_snapshot`, `fuel_price_snapshot`, `total_fuel_cost`, `trips_required`, `assigned_by → users(id)`, `created_at`).
-- [ ] T-04.1.2 — Servicio de cálculo **server-side** (fuente de verdad; el front solo proyecta).
-- [ ] T-04.1.3 — `POST /api/requests/:id/assign`.
-- [ ] T-04.1.4 — Snapshot de parámetros para no alterar costos históricos al cambiar el precio.
-- [ ] T-04.1.5 — Tests unitarios de la fórmula (incluye decimales y redondeo).
+- [x] T-04.1.1 — Tabla `assignments` (`request_id`, `truck_id`, `distance_km`, `consumption_snapshot`, `fuel_price_snapshot`, `total_fuel_cost`, `trips_required`, `assigned_by → users(id)`, `created_at`).
+- [x] T-04.1.2 — Servicio de cálculo **server-side** (fuente de verdad; el front solo proyecta).
+- [x] T-04.1.3 — `POST /api/requests/:id/assign`.
+- [x] T-04.1.4 — Snapshot de parámetros para no alterar costos históricos al cambiar el precio.
+- [x] T-04.1.5 — Tests unitarios de la fórmula (incluye decimales y redondeo).
 
 ### US-04.2 — Alertar exceso de capacidad y sugerir solución
 **Como** operador, **quiero** ser alertado cuando las cabezas superan la capacidad del camión, **para** decidir entre múltiples viajes o cambiar de vehículo.
@@ -198,10 +198,10 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** múltiples viajes, **cuando** se acepta esa opción, **entonces** el costo se ajusta (`costo × trips_required` o según política definida y documentada).
 
 **Tareas técnicas**
-- [ ] T-04.2.1 — Lógica `trips_required = ceil(head_count / capacity)` en el servicio.
-- [ ] T-04.2.2 — Componente de alerta no intrusivo con acciones (múltiples viajes / cambiar camión).
-- [ ] T-04.2.3 — Documentar política de costeo de múltiples viajes en `DOCUMENTACION.md`.
-- [ ] T-04.2.4 — Tests: `N=C`, `N<C`, `N>C`, `N` múltiplo y no múltiplo de `C`.
+- [x] T-04.2.1 — Lógica `trips_required = ceil(head_count / capacity)` en el servicio.
+- [x] T-04.2.2 — Componente de alerta no intrusivo con acciones (múltiples viajes / cambiar camión).
+- [x] T-04.2.3 — Documentar política de costeo de múltiples viajes en `DOCUMENTACION.md`.
+- [x] T-04.2.4 — Tests: `N=C`, `N<C`, `N>C`, `N` múltiplo y no múltiplo de `C`.
 
 ### US-04.3 — Evitar doble asignación de un camión
 **Como** operador, **quiero** que un camión ocupado en un viaje activo no pueda asignarse a otra solicitud al mismo tiempo, **para** evitar conflictos de disponibilidad (doble-booking).
@@ -212,10 +212,10 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** el selector de asignación, **cuando** lo abro, **entonces** los camiones ocupados aparecen marcados como no disponibles (o filtrados).
 
 **Tareas técnicas**
-- [ ] T-04.3.1 — Consulta de disponibilidad: camión sin asignación en estado activo.
-- [ ] T-04.3.2 — Validación server-side al asignar (rechazo `409`/`422` si ocupado).
-- [ ] T-04.3.3 — Reflejar disponibilidad en el selector de camión del panel.
-- [ ] T-04.3.4 — Tests: asignar camión libre, intentar asignar ocupado, liberar al completar/cancelar.
+- [x] T-04.3.1 — Consulta de disponibilidad: camión sin asignación en estado activo.
+- [x] T-04.3.2 — Validación server-side al asignar (rechazo `409`/`422` si ocupado).
+- [x] T-04.3.3 — Reflejar disponibilidad en el selector de camión del panel.
+- [x] T-04.3.4 — Tests: asignar camión libre, intentar asignar ocupado, liberar al completar/cancelar.
 
 ---
 
@@ -246,11 +246,11 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** un reinicio de contenedores, **cuando** vuelvo a levantar, **entonces** los datos persisten vía volumen.
 
 **Tareas técnicas**
-- [ ] T-06.1.1 — `docker-compose.yml` con servicios `app` y `db` + red interna.
-- [ ] T-06.1.2 — Variables de entorno (`.env.example`) para conexión y precio inicial.
-- [ ] T-06.1.3 — `init.sql` con DDL + seed realista de Paraguay: admin por defecto, 4-6 camiones con patentes/capacidades/consumos variados, y solicitudes de ejemplo entre ciudades reales con coordenadas aproximadas — Asunción (-25.2637, -57.5759), Ciudad del Este (-25.5097, -54.6111), Encarnación (-27.3306, -55.8667), Concepción (-23.4064, -57.4344), Coronel Oviedo (-25.4486, -56.4406). Esto hace creíble el demo de mapa/ruteo.
-- [ ] T-06.1.4 — Volumen persistente para PostgreSQL.
-- [ ] T-06.1.5 — `Dockerfile` multi-stage para Next.js.
+- [x] T-06.1.1 — `docker-compose.yml` con servicios `app` y `db` + red interna.
+- [x] T-06.1.2 — Variables de entorno (`.env.example`) para conexión y precio inicial.
+- [x] T-06.1.3 — `init.sql` con DDL + seed realista de Paraguay: admin por defecto, 4-6 camiones con patentes/capacidades/consumos variados, y solicitudes de ejemplo entre ciudades reales con coordenadas aproximadas — Asunción (-25.2637, -57.5759), Ciudad del Este (-25.5097, -54.6111), Encarnación (-27.3306, -55.8667), Concepción (-23.4064, -57.4344), Coronel Oviedo (-25.4486, -56.4406). Esto hace creíble el demo de mapa/ruteo.
+- [x] T-06.1.4 — Volumen persistente para PostgreSQL.
+- [x] T-06.1.5 — `Dockerfile` multi-stage para Next.js.
 
 ### US-06.2 — Base de datos consistente
 **Como** arquitecto, **quiero** un modelo relacional con llaves e integridad referencial, **para** evitar datos inconsistentes.
@@ -260,8 +260,8 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** la eliminación lógica de camiones, **cuando** ocurre, **entonces** no se rompen asignaciones históricas (sin `CASCADE` destructivo).
 
 **Tareas técnicas**
-- [ ] T-06.2.1 — FKs, índices en columnas de búsqueda (`status`, `request_id`, `truck_id`).
-- [ ] T-06.2.2 — Constraints de dominio (CHECK) y unicidad.
+- [x] T-06.2.1 — FKs, índices en columnas de búsqueda (`status`, `request_id`, `truck_id`).
+- [x] T-06.2.2 — Constraints de dominio (CHECK) y unicidad.
 
 ---
 
@@ -279,12 +279,12 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** una sesión activa, **cuando** cierro sesión, **entonces** la sesión se invalida y rutas protegidas dejan de ser accesibles.
 
 **Tareas técnicas**
-- [ ] T-07.1.1 — Tabla `users` (`id`, `username UNIQUE`, `password_hash`, `role`, `is_active`, `created_at`).
-- [ ] T-07.1.2 — Hashing de contraseñas con bcrypt/argon2 (nunca texto plano).
-- [ ] T-07.1.3 — `POST /api/auth/login` y `POST /api/auth/logout`; sesión vía cookie httpOnly o JWT.
-- [ ] T-07.1.4 — Middleware de protección de rutas/endpoints; redirección de no autenticados.
-- [ ] T-07.1.5 — Seed del admin por defecto con contraseña ya hasheada en `init.sql`.
-- [ ] T-07.1.6 — Tests: login OK, login inválido, acceso a ruta protegida sin sesión.
+- [x] T-07.1.1 — Tabla `users` (`id`, `username UNIQUE`, `password_hash`, `role`, `is_active`, `created_at`).
+- [x] T-07.1.2 — Hashing de contraseñas con bcrypt/argon2 (nunca texto plano).
+- [x] T-07.1.3 — `POST /api/auth/login` y `POST /api/auth/logout`; sesión vía cookie httpOnly o JWT.
+- [x] T-07.1.4 — Middleware de protección de rutas/endpoints; redirección de no autenticados.
+- [x] T-07.1.5 — Seed del admin por defecto con contraseña ya hasheada en `init.sql`.
+- [x] T-07.1.6 — Tests: login OK, login inválido, acceso a ruta protegida sin sesión.
 
 ### US-07.2 — Administrar usuarios (CRUD)
 **Como** admin, **quiero** crear, listar, editar y desactivar usuarios, **para** controlar quién puede operar el sistema.
@@ -298,12 +298,12 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** el último usuario admin activo, **cuando** intento desactivarlo o quitarle el rol admin, **entonces** el sistema lo impide (no dejar el sistema sin administradores).
 
 **Tareas técnicas**
-- [ ] T-07.2.1 — `GET/POST /api/users`, `PATCH /api/users/:id`, `PATCH /api/users/:id/status`.
-- [ ] T-07.2.2 — Autorización por rol (guard `admin`) en endpoints y UI.
-- [ ] T-07.2.3 — Validación de username único y fortaleza mínima de contraseña.
-- [ ] T-07.2.4 — Regla "no dejar el sistema sin admin activo".
-- [ ] T-07.2.5 — UI de CRUD de usuarios (solo visible para admin).
-- [ ] T-07.2.6 — Tests: CRUD, unicidad, 403 para operador, protección del último admin.
+- [x] T-07.2.1 — `GET/POST /api/users`, `PATCH /api/users/:id`, `PATCH /api/users/:id/status`.
+- [x] T-07.2.2 — Autorización por rol (guard `admin`) en endpoints y UI.
+- [x] T-07.2.3 — Validación de username único y fortaleza mínima de contraseña.
+- [x] T-07.2.4 — Regla "no dejar el sistema sin admin activo".
+- [x] T-07.2.5 — UI de CRUD de usuarios (solo visible para admin).
+- [x] T-07.2.6 — Tests: CRUD, unicidad, 403 para operador, protección del último admin.
 
 ### US-07.3 — Atribución y trazabilidad de cargas
 **Como** admin/operador, **quiero** ver quién cargó cada camión y cada solicitud, **para** auditar y dar seguimiento.
@@ -313,9 +313,9 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 - **Dado** que un usuario fue desactivado, **cuando** consulto sus cargas históricas, **entonces** la atribución se conserva (sin borrado en cascada).
 
 **Tareas técnicas**
-- [ ] T-07.3.1 — Columna `created_by` (FK a `users`) en `trucks`, `transport_requests` y `assignments` (`assigned_by`).
-- [ ] T-07.3.2 — Poblar `created_by`/`assigned_by` desde la sesión autenticada en cada alta/asignación.
-- [ ] T-07.3.3 — Mostrar autor + fecha en las vistas de flota, solicitudes y detalle de asignación.
+- [x] T-07.3.1 — Columna `created_by` (FK a `users`) en `trucks`, `transport_requests` y `assignments` (`assigned_by`).
+- [x] T-07.3.2 — Poblar `created_by`/`assigned_by` desde la sesión autenticada en cada alta/asignación.
+- [x] T-07.3.3 — Mostrar autor + fecha en las vistas de flota, solicitudes y detalle de asignación.
 
 ---
 
@@ -338,10 +338,10 @@ pending ──asignar camión──▶ assigned ──confirmar viaje──▶ c
 **RNF-07 · Observabilidad mínima.** Logging básico de errores del servidor y de operaciones clave (login, asignación), suficiente para diagnosticar sin sobre-ingeniería.
 
 **Tareas técnicas transversales**
-- [ ] RNF-T1 — Componentes base reutilizables de estado (loading/empty/error).
-- [ ] RNF-T2 — Helper central de respuestas y errores de API.
-- [ ] RNF-T3 — Utilidad de formateo de moneda/números (locale `es-PY`).
-- [ ] RNF-T4 — Middleware de auth/rol y manejo centralizado de excepciones.
+- [x] RNF-T1 — Componentes base reutilizables de estado (loading/empty/error).
+- [x] RNF-T2 — Helper central de respuestas y errores de API.
+- [x] RNF-T3 — Utilidad de formateo de moneda/números (locale `es-PY`).
+- [x] RNF-T4 — Middleware de auth/rol y manejo centralizado de excepciones.
 
 ---
 
@@ -411,4 +411,4 @@ settings(key PK, value)   -- p.ej. ('fuel_price_per_liter', '...')
 5. **Tareas técnicas** — "Derivá tasks de backend (API+SQL), frontend y testing, trazables a cada US."
 6. **Supuestos** — "Listá los supuestos de PO que toman decisiones donde la pauta es ambigua (rol único, distancia por ruteo, snapshot de precio)."
 
-> *Pegar aquí el enlace o transcripción del hilo real de Claude para la entrega final.*
+> *https://claude.ai/chat/bbf10519-b354-4521-9906-8a7594f82d02*
